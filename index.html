@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sistema de Precificação</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{--bg:#f6f4f1;--cd:#fff;--tx:#2b2622;--mu:#7a716a;--bd:#e4ded8;--ac:#b4532a;--ok:#2e7d4f;--bad:#c0392b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1815;--cd:#27231f;--tx:#f0ebe6;--mu:#a89f96;--bd:#3a342e;--ac:#e0825a;--ok:#5fc08a;--bad:#ef7a6c;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1b1815;--cd:#27231f;--tx:#f0ebe6;--mu:#a89f96;--bd:#3a342e;--ac:#e0825a;--ok:#5fc08a;--bad:#ef7a6c;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;padding-bottom:70px}
+header{padding:14px 16px 4px;display:flex;justify-content:space-between;align-items:center}
+h1{font-size:19px;margin:0}h2{font-size:15px;margin:0 0 10px}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--cd);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+nav button{flex:1;border:0;background:none;color:var(--mu);padding:10px 2px;font:12px system-ui;cursor:pointer}
+nav button.on{color:var(--ac);font-weight:700}
+main{max-width:1600px;margin:0 auto;padding:10px 12px}
+.g{display:grid;gap:10px}.k{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}.c2{grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+.cd{background:var(--cd);border:1px solid var(--bd);border-radius:14px;padding:12px}
+.kv{font-size:21px;font-weight:700;color:var(--ac)}.lb{font-size:12px;color:var(--mu)}
+.w{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:5px 6px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}th{font-size:11px;color:var(--mu);position:sticky;top:0;background:var(--cd)}
+td.r,th.r{text-align:right}
+input,select{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:5px 7px;width:100%;min-width:60px}
+td input{min-width:70px}input[data-k="n"]{min-width:280px}input.bad{border-color:var(--bad)}
+button.b{background:var(--ac);color:#fff;border:0;border-radius:8px;padding:7px 12px;font:inherit;cursor:pointer}button.s{background:none;color:var(--ac);border:1px solid var(--bd)}
+.ok{color:var(--ok);font-weight:600}.no{color:var(--bad);font-weight:600}
+.sec{display:none}.sec.on{display:block}dialog{width:min(900px,96vw);max-height:92vh;overflow:auto;background:var(--cd);color:var(--tx);border:1px solid var(--bd);border-radius:14px}
+.cv{position:relative;height:240px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row>*{flex:1}.note{font-size:12px;color:var(--mu)}
+@media(min-width:901px){.pt{table-layout:fixed}.pt th,.pt td{white-space:normal;padding:4px 3px;font-size:12px;vertical-align:middle}.pt th{position:static}.pt input{min-width:0!important;width:100%!important;padding:4px 3px}.pt th:first-child{width:17%}.pt th:last-child{width:10%}.pt td:last-child button{margin:1px}}
+@media(max-width:900px){.pt,.pt tbody{display:block}.pt tr:first-child{display:none}.pt tr{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;border:1px solid var(--bd);border-radius:12px;padding:10px;margin-bottom:10px}.pt td{border:0;display:flex;justify-content:space-between;align-items:center;gap:6px;padding:2px 0}.pt td::before{content:attr(data-l);font-size:11px;color:var(--mu)}.pt td:first-child,.pt td:last-child{grid-column:1/-1}.pt td:first-child::before,.pt td:last-child::before{content:none}.pt td:first-child input{width:100%!important;min-width:0!important}.pt td input{width:90px!important;min-width:0!important}}
+@media(min-width:760px){nav{position:static;border:0;background:none;max-width:1100px;margin:0 auto;padding:0 12px}nav button{flex:none;padding:8px 16px;font-size:14px}body{padding-bottom:20px}}
+@media print{body>*:not(dialog){display:none!important}dialog{position:static;width:100%;max-height:none;border:0;display:block}dialog button,#pm{display:none!important}}
+</style></head><body>
+<header><h1>Sistema de Precificação</h1><div class="row" style="flex:none"><button class="b s" id="th">Tema</button></div></header>
+<nav id="nv"></nav>
+<main>
+<section class="sec" id="s0"></section><section class="sec" id="s1"></section><section class="sec" id="s2"></section><section class="sec" id="s3"></section>
+</main>
+<dialog id="fd"></dialog><datalist id="il"></datalist>
+<script>
+const SEED={"custos":{"fat":5000,"it":[{"d":"Hora da mão de obra","v":300,"c":"Despesas Fixas"},{"d":"Luz","v":50,"c":"Despesas Fixas"},{"d":"MEI","v":88,"c":"Despesas Fixas"}],"cats":["Despesas Fixas"]},"ing":[{"n":"Pigmento Vermelho","u":"ml","q":100,"v":16.97},{"n":"Corante Vermelho","u":"ml","q":30,"v":5.39},{"n":"Base Glicerinada Branca/Transparente","u":"Kg","q":3,"v":116.23},{"n":"Essencia de Lavanda de Provence","u":"ml","q":100,"v":16.05},{"n":"Extrato Glicólico de Aveia","u":"ml","q":100,"v":22.5},{"n":"Essência Flor de Cerejeira Pop","u":"ml","q":100,"v":20.5},{"n":"Essência Algas Marinhas New","u":"ml","q":100,"v":24.21},{"n":"Essência de Alecrim New","u":"ml","q":100,"v":24.21},{"n":"Essência de Maracujá","u":"ml","q":100,"v":41.1},{"n":"Essência de Amora","u":"ml","q":100,"v":41.1},{"n":"Essência Cravo e Canela","u":"ml","q":100,"v":24.72},{"n":"Essência de Capim-Limão","u":"ml","q":100,"v":24.72},{"n":"Essência de Lavanda New","u":"ml","q":100,"v":24.21},{"n":"Essência de Camomila Pop","u":"ml","q":100,"v":14.32},{"n":"Corante Azul","u":"ml","q":30,"v":5.39},{"n":"Corante Rosa","u":"ml","q":30,"v":5.39},{"n":"Corante Amarela","u":"ml","q":30,"v":5.39},{"n":"Corante Verde","u":"ml","q":30,"v":5.39},{"n":"Pigmento Verde","u":"ml","q":100,"v":16.97},{"n":"Pigmento Amarelo","u":"ml","q":100,"v":16.97},{"n":"Pigmento Azul","u":"ml","q":100,"v":16.97},{"n":"Pó Mica dourado","u":"grama","q":100,"v":34.9},{"n":"Lauril líquido","u":"ml","q":1000,"v":17.9},{"n":"fio de Juta","u":"metros","q":110,"v":15.9},{"n":"Sacola dourada","u":"und","q":100,"v":25.8},{"n":"TAG","u":"und","q":2000,"v":88},{"n":"Fita durex","u":"metros","q":40,"v":10},{"n":"Papel Kraft","u":"und","q":50,"v":9.5},{"n":"Hortelã","u":"grama","q":100,"v":5},{"n":"Canela","u":"grama","q":100,"v":5},{"n":"Cravo","u":"grama","q":100,"v":5},{"n":"Erva Cidreira","u":"grama","q":100,"v":5},{"n":"Arruda","u":"grama","q":100,"v":5},{"n":"Plastico Filme Stech","u":"metros","q":100,"v":9.9},{"n":"sal grosso","u":"grama","q":1000,"v":2},{"n":"Oleo de coco","u":"ml","q":100,"v":8},{"n":"Gergilim","u":"gramas","q":100,"v":6},{"n":"Bucha Vegetal","u":"cm","q":100,"v":20.9},{"n":"Pó de Anil","u":"grama","q":90,"v":18.9},{"n":"Essencia de Marine","u":"ml","q":100,"v":15.25},{"n":"Essencia de Mel","u":"ml","q":100,"v":16.05},{"n":"Essencia de Melancia","u":"ml","q":100,"v":16.05},{"n":"Essencia de Uva","u":"ml","q":100,"v":16.05},{"n":"Essencia de Anis","u":"ml","q":100,"v":16.05},{"n":"Essencia de Frutas Vermelhas","u":"ml","q":100,"v":12.9},{"n":"Corante Azul Turquesa","u":"ml","q":100,"v":7.8},{"n":"Corante Lilás","u":"ml","q":100,"v":7.8},{"n":"Corante Verde Abacate","u":"ml","q":100,"v":10.5}],"units":["Kg","grama","litro","ml","pacote","unidade","cm","metros"],"prods":[{"i":1,"n":"Sabonete Elixir de Calmaria","e":1.05,"m":0.6,"a":null,"c":null,"d":null,"p":10.9,"r":12,"it":[{"n":"Essência de Camomila Pop","q":36},{"n":"Base Glicerinada Transparente","q":1.2},{"n":"Extrato Glicólico de Aveia","q":36},{"n":"fio de Juta","q":0.5},{"n":"Essência de Camomila Pop","q":30},{"n":"Lauril líquido","q":50},{"n":"Corante Amarela","q":2},{"n":"Erva Cidreira","q":10}]},{"i":2,"n":"Sabonete de Lavanda","e":1.05,"m":0.6,"a":null,"c":null,"d":null,"p":10.9,"r":10,"it":[{"n":"Essência de Lavanda New","q":30},{"n":"Base Glicerinada Branca","q":1},{"n":"Extrato Glicólico de Aveia","q":30},{"n":"Corante Vermelho","q":2},{"n":"Corante Rosa","q":2},{"n":"Lauril líquido","q":50}]},{"i":3,"n":"Sabonete Bruma Verde","e":1.05,"m":0.6,"a":null,"c":null,"d":null,"p":10.9,"r":12,"it":[{"n":"Essência de Capim-Limão","q":36},{"n":"Base Glicerinada Transparente","q":1.2},{"n":"Corante Verde","q":2},{"n":"Extrato Glicólico de Aveia","q":36},{"n":"Hortelã","q":10}]},{"i":4,"n":"Sabonete Âmbar de Especiarias","e":1.05,"m":0.6,"a":null,"c":null,"d":null,"p":10.9,"r":12,"it":[{"n":"Essência Cravo e Canela","q":36},{"n":"Base Glicerinada Transparente","q":1.2},{"n":"Corante Vermelho","q":2},{"n":"Corante Azul","q":2},{"n":"Corante Amarela","q":2},{"n":"Extrato Glicólico de Aveia","q":36},{"n":"Lauril líquido","q":50}]},{"i":5,"n":"Sabonete de Frutas Vermelhas","e":1.05,"m":0.6,"a":null,"c":null,"d":null,"p":19.9,"r":12,"it":[{"n":"Essência de Amora","q":57.5},{"n":"Base Glicerinada Branca","q":1.417},{"n":"Base Glicerinada Transparente","q":0.65},{"n":"Corante Vermelho","q":30},{"n":"Corante Azul","q":30},{"n":"Lauril líquido","q":62.5},{"n":"Extrato Glicólico de Aveia","q":57.5}]},{"i":6,"n":"Sabonete Explosão Cítrica Maracujá","e":1.05,"m":0.6,"a":null,"c":null,"d":null,"p":10.9,"r":6,"it":[{"n":"Essência de Maracujá","q":18},{"n":"Base Glicerinada Branca","q":0.4},{"n":"Base Glicerinada Transparente","q":0.2},{"n":"Corante Amarela","q":2},{"n":"Lauril líquido","q":26},{"n":"Oleo de coco","q":18},{"n":"Gergilim","q":30}]},{"i":7,"n":"Sabonete Aura de Proteção","e":1.05,"m":0.6,"a":null,"c":null,"d":null,"p":10.9,"r":10,"it":[{"n":"Essência de Alecrim New","q":30},{"n":"Base Glicerinada Transparente","q":1},{"n":"Corante Verde","q":1},{"n":"Extrato Glicólico de Aveia","q":30},{"n":"Lauril líquido","q":50},{"n":"Arruda","q":10},{"n":"sal grosso","q":160}]},{"i":8,"n":"Sabonete de Algas Marinhas","e":1.05,"m":0.6,"a":null,"c":null,"d":null,"p":19.9,"r":5,"it":[{"n":"Essência Algas Marinhas New","q":36},{"n":"Base Glicerinada Branca","q":0.6},{"n":"Base Glicerinada Transparente","q":0.6},{"n":"Corante Azul","q":2},{"n":"Lauril líquido","q":60},{"n":"Extrato Glicólico de Aveia","q":36},{"n":"Bucha Vegetal","q":20}]},{"i":9,"n":"Sabonete Massageador de Flor de Cerejeira","e":1.05,"m":0.6,"a":null,"c":null,"d":null,"p":15.9,"r":4,"it":[{"n":"Essência Flor de Cerejeira Pop","q":18},{"n":"Base Glicerinada Branca","q":0.6},{"n":"Corante Rosa","q":2},{"n":"Extrato Glicólico de Aveia","q":18},{"n":"Lauril líquido","q":30},{"n":"Pó Mica dourado","q":10}]},{"i":10,"n":"Sabonete Massageador de Algas Marinhas","e":1.05,"m":0.6,"a":null,"c":null,"d":null,"p":15.9,"r":4,"it":[{"n":"Base Glicerinada Branca","q":0.51},{"n":"Essência Algas Marinhas New","q":18},{"n":"Corante Azul","q":2},{"n":"Bucha Vegetal","q":16},{"n":"Lauril líquido","q":30},{"n":"Oleo de coco","q":18}]},{"i":11,"n":"Sabonete Massageador Brisa Atlântica","e":1.05,"m":0.6,"a":null,"c":null,"d":null,"p":15.9,"r":4,"it":[{"n":"Base Glicerinada Branca","q":0.25},{"n":"Base Glicerinada Transparente","q":0.35},{"n":"Corante Azul","q":2},{"n":"Bucha Vegetal","q":4},{"n":"Essência Algas Marinhas New","q":24},{"n":"Lauril líquido","q":9},{"n":"Oleo de coco","q":6}]},{"i":12,"n":"Sabonetes de Cacho Várias Essências","e":1.05,"m":0.6,"a":null,"c":null,"d":null,"p":29.9,"r":1,"it":[{"n":"Base Glicerinada Transparente","q":0.3},{"n":"Lauril líquido","q":4.5},{"n":"Essência de Amora","q":12},{"n":"Oleo de coco","q":3},{"n":"Pó Mica dourado","q":3}]},{"i":13,"n":"Sabonete de Encanto Silvestre Frutas Vemelhas","e":1.05,"m":0.6,"a":null,"c":null,"d":null,"p":19.9,"r":6,"it":[{"n":"Base Glicerinada Branca","q":0.8},{"n":"Base Glicerinada Transparente","q":0.5},{"n":"Essencia de Frutas Vermelhas","q":52},{"n":"Corante Vermelho","q":2},{"n":"Oleo de coco","q":13},{"n":"Lauril líquido","q":19.5}]},{"i":14,"n":"Sabonete Brisa Atlântica Marine","e":1.05,"m":0.6,"a":null,"c":null,"d":null,"p":15.9,"r":6,"it":[{"n":"Base Glicerinada Branca","q":0.46},{"n":"Base Glicerinada Transparente","q":0.4},{"n":"Essencia de Marine","q":34},{"n":"Oleo de coco","q":8.5},{"n":"Lauril líquido","q":12.75},{"n":"Bucha Vegetal","q":12}]},{"i":15,"n":"Sabonete de Verde Sereno","e":1.05,"m":0.6,"a":null,"c":null,"d":null,"p":10.9,"r":3,"it":[{"n":"Essência de Capim-Limão","q":12},{"n":"Base Glicerinada Transparente","q":0.3},{"n":"Oleo de coco","q":3},{"n":"Lauril líquido","q":4.5},{"n":"Corante Verde","q":2}]},{"i":16,"n":"Sabonete de Corações Diversas essencias","e":1.05,"m":0.6,"a":null,"c":null,"d":null,"p":null,"r":null,"it":[]},{"i":17,"n":"Sabonete Aura de Anil","e":1.05,"m":0.6,"a":null,"c":null,"d":null,"p":null,"r":null,"it":[]},{"i":18,"n":"Sabonete Encanto de Melancia","e":1.05,"m":0.6,"a":null,"c":null,"d":null,"p":null,"r":null,"it":[]},{"i":19,"n":"Sabonete Véu de Mel","e":1.05,"m":0.6,"a":null,"c":null,"d":null,"p":null,"r":null,"it":[]},{"i":20,"n":"Sabonete Encanto de Uva","e":1.05,"m":0.6,"a":null,"c":null,"d":null,"p":null,"r":null,"it":[]},{"i":21,"n":"Mini Cacho Encanto de Natal","e":1.05,"m":0.6,"a":null,"c":null,"d":null,"p":5,"r":4,"it":[{"n":"Base Glicerinada Branca/Transparente","q":0.05714},{"n":"Lauril líquido","q":0.86},{"n":"Essencia de Frutas Vermelhas","q":2.29},{"n":"Oleo de coco","q":0.57},{"n":"fio de Juta","q":0.6},{"n":"Plastico Filme Stech","q":0.2},{"n":"Corante Vermelho","q":0.1},{"n":"Corante Amarela","q":0.1},{"n":"Corante Verde Abacate","q":0.1}]}]};
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const num=v=>{v=String(v).trim().replace(',','.');return v===''||isNaN(v)?null:parseFloat(v)};
+const isn=v=>typeof v==='number'&&isFinite(v);
+const brl=v=>isn(v)?v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):'—';
+const pc=v=>isn(v)?(v*100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%':'—';
+//CALC
+function calc(S){
+ const im=new Map();S.ing.forEach(g=>{const k=String(g.n).toLowerCase();if(k&&!im.has(k))im.set(k,g)});
+ const fixos=S.custos.it.reduce((a,x)=>a+(+x.v||0),0),fat=+S.custos.fat||0,cf=fat?fixos/fat:0;
+ const P=S.prods.map(p=>{
+  const rows=p.it.map(x=>{const g=im.get(String(x.n).toLowerCase()),u=g&&+g.q?g.v/g.q:'';return{g,u,cu:isn(u)?(+x.q||0)*u:0}});
+  const tot=rows.reduce((a,r)=>a+r.cu,0),C=isn(p.r)&&p.r!==0?tot/p.r:(p.r===0?0:tot);
+  const t=(p.a||0)+(p.c||0)+(p.d||0),D=cf*C,F=C+D+(p.e||0),H=F*(1+(p.m||0)),L=H/(1-t),M=p.p||0;
+  const N=F?(M*(1-t))/F-1:'',O=N===''?'':(N<(p.m||0)?'Ajustar':'Dentro da margem'),Mg=p.n?M-(F+M*t):'';
+  return{...p,rows,tot,C,D,F,H,L,N,O,Mg,t}});
+ const av=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
+ const pm=av(P.filter(p=>isn(p.p)).map(p=>p.p)),mm=av(P.filter(p=>isn(p.Mg)).map(p=>p.Mg));
+ const cats=S.custos.cats.map(c=>({c,v:S.custos.it.filter(x=>x.c===c).reduce((a,x)=>a+(+x.v||0),0)}));
+ return{P,im,fixos,fat,cf,pm,mm,cats,n:P.filter(p=>p.n).length,fatmin:mm&&pm?fixos/(mm/pm):'',pe:mm?Math.round(fixos/mm):0}}
+//ENDCALC
+let S,K,ch=[],tab=0,sel=0;
+const load=()=>{try{const s=localStorage.getItem('sp1');if(s)return JSON.parse(s)}catch(e){}return JSON.parse(JSON.stringify(SEED))};
+const save=()=>{try{localStorage.setItem('sp1',JSON.stringify(S))}catch(e){}};
+const T=['Dashboard','Custos e Taxas','Fichas técnicas','Ingredientes'];
+function inp(t,i,k,v,o=''){return`<input data-t="${t}" data-i="${i}" data-k="${k}" value="${esc(v??'')}" ${o}>`}
+function pin(t,i,k,v){return inp(t,i,k,isn(v)?+(v*100).toFixed(2):'','inputmode="decimal" style="width:70px"')}
+function render(){K=calc(S);$('#nv').innerHTML=T.map((x,i)=>`<button class="${i==tab?'on':''}" data-nav="${i}">${x}</button>`).join('');
+ document.querySelectorAll('.sec').forEach((e,i)=>e.classList.toggle('on',i==tab));
+ $('#il').innerHTML=S.ing.map(g=>`<option value="${esc(g.n)}">`).join('');
+ [dash,custos,prec,ings][tab]();document.querySelectorAll('.pt tr').forEach(r=>{const h=document.querySelectorAll('.pt th');[...r.children].forEach((c,i)=>{if(h[i])c.dataset.l=h[i].textContent})});save()}
+function mk(id,type,labels,data,opt={}){const el=document.getElementById(id);if(!el||!window.Chart)return;const tx=getComputedStyle(document.documentElement).getPropertyValue('--tx');
+ const pal=['#b4532a','#d9a441','#5a8f7b','#6b7fb5','#a8648c','#8a8a8a'];
+ ch.push(new Chart(el,{type,data:{labels,datasets:[{data,backgroundColor:type=='doughnut'?pal:pal[0],borderWidth:0}]},options:{maintainAspectRatio:false,indexAxis:opt.h?'y':'x',plugins:{legend:{display:type=='doughnut',labels:{color:tx}}},scales:type=='doughnut'?{}:{x:{ticks:{color:tx}},y:{ticks:{color:tx}}}}}))}
+function dash(){ch.forEach(c=>c.destroy());ch=[];const P=K.P.filter(p=>p.n),p=P[sel]||P[0]||{},top=(f)=>[...P].filter(x=>isn(x[f])).sort((a,b)=>b[f]-a[f]).slice(0,5);
+ const kp=(l,v)=>`<div class="cd"><div class="lb">${l}</div><div class="kv">${v}</div></div>`;
+ $('#s0').innerHTML=`<div class="g k">${kp('Produtos cadastrados',K.n)}${kp('Preço médio de revenda',brl(K.pm))}${kp('Despesas fixas',brl(K.fixos))}${kp('Margem de contribuição média',brl(K.mm))}${kp('Ponto de equilíbrio',K.pe+' produtos')}</div>
+ <p class="note">Faturamento necessário para não ter prejuízo: <b>${brl(K.fatmin)}</b></p>
+ <div class="g c2"><div class="cd"><h2>Análise por produto</h2><select data-t="sel">${P.map((x,i)=>`<option value="${i}" ${i==sel?'selected':''}>${esc(x.n)}</option>`).join('')}</select>
+ <div class="g k" style="margin-top:10px">${kp('Preço de venda',brl(p.p||0))}${kp('Custos totais',brl(p.F))}${kp('Margem de contribuição',brl(p.Mg))}${kp('Ponto de equilíbrio',isn(p.Mg)&&p.Mg?Math.round(K.fixos/p.Mg):0)}</div></div>
+ <div class="cd"><h2>Top 5 produtos com maior margem</h2><div class="cv"><canvas id="c1"></canvas></div></div>
+ <div class="cd"><h2>Despesas fixas por categoria</h2><div class="cv"><canvas id="c2"></canvas></div></div>
+ <div class="cd"><h2>Top 5 produtos com maiores custos</h2><div class="cv"><canvas id="c3"></canvas></div></div>
+ <div class="cd"><h2>Faturamento vs Despesas fixas</h2><div class="cv"><canvas id="c4"></canvas></div></div></div>`;
+ const a=top('Mg'),b=top('F');mk('c1','bar',a.map(x=>x.n),a.map(x=>+x.Mg.toFixed(2)));mk('c2','doughnut',K.cats.map(c=>c.c),K.cats.map(c=>c.v));
+ mk('c3','bar',b.map(x=>x.n),b.map(x=>+x.F.toFixed(2)),{h:1});mk('c4','doughnut',['Despesas Fixas','Faturamento'],[K.fixos,K.fat])}
+function custos(){const c=S.custos;$('#s1').innerHTML=`<div class="g c2"><div class="cd"><h2>Custos fixos</h2><div class="w"><table><tr><th>Descrição</th><th class="r">Valor</th><th>Categoria</th><th></th></tr>
+ ${c.it.map((x,i)=>`<tr><td>${inp('ci',i,'d',x.d)}</td><td>${inp('ci',i,'v',x.v,'inputmode="decimal"')}</td><td><select data-t="ci" data-i="${i}" data-k="c">${c.cats.map(k=>`<option ${k===x.c?'selected':''}>${esc(k)}</option>`).join('')}</select></td><td><button class="b s" data-del="ci:${i}">✕</button></td></tr>`).join('')}
+ <tr><td><b>Total</b></td><td class="r"><b>${brl(K.fixos)}</b></td><td></td><td></td></tr></table></div>${c.it.length<24?'<p><button class="b" data-add="ci">+ Custo</button></p>':''}</div>
+ <div class="cd"><h2>Faturamento médio mensal</h2>${inp('fat',0,'fat',c.fat,'inputmode="decimal"')}<p class="lb">Custo fixo (total ÷ faturamento)</p><div class="kv">${pc(K.cf)}</div>
+ <p class="note">Esse percentual é aplicado sobre o custo de insumos de cada produto.</p><h2>Categorias de custos fixos</h2>
+ ${c.cats.map((k,i)=>`<div class="row" style="margin-bottom:6px">${inp('cat',i,'c',k)}<button class="b s" style="flex:none" data-del="cat:${i}">✕</button></div>`).join('')}<button class="b" data-add="cat">+ Categoria</button></div></div>`}
+function prec(){const hd=['Produto','Custo insumos','Custo fixo','Embalagem','Custo total','Markup ideal %','Preço c/ markup','Impostos %','Cartão %','Delivery/iFood %','Preço sugerido','Preço praticado','Markup aplicado','Status','Margem contrib.',''];
+ $('#s2').innerHTML=`<div class="cd"><p class="note">Preencha apenas os campos editáveis; o restante é calculado. Médias — preço praticado: <b>${brl(K.pm)}</b> · margem: <b>${brl(K.mm)}</b></p><div class="w"><table class="pt"><tr>${hd.map((h,i)=>`<th class="${i&&i!=13?'r':''}">${h}</th>`).join('')}</tr>
+ ${K.P.map((p,i)=>`<tr><td>${inp('pn',i,'n',p.n)}</td><td class="r">${brl(p.C)}</td><td class="r">${brl(p.D)}</td><td>${inp('pe',i,'e',p.e,'inputmode="decimal"')}</td><td class="r">${brl(p.F)}</td><td>${pin('pm',i,'m',p.m)}</td><td class="r">${brl(p.H)}</td><td>${pin('pm',i,'a',p.a)}</td><td>${pin('pm',i,'c',p.c)}</td><td>${pin('pm',i,'d',p.d)}</td><td class="r">${brl(p.L)}</td><td>${inp('pe',i,'p',p.p,'inputmode="decimal"')}</td><td class="r">${pc(p.N)}</td><td class="${p.O=='Ajustar'?'no':'ok'}">${p.O}</td><td class="r">${brl(p.Mg)}</td><td><button class="b s" data-fd="${i}">Ficha</button> <button class="b s" data-del="pr:${i}">✕</button></td></tr>`).join('')}</table></div>
+ ${S.prods.length<100?'<p><button class="b" data-add="pr">+ Produto</button></p>':''}</div>`}
+function ings(){const q=($('#qi')||{}).value||'';$('#s3').innerHTML=`<div class="cd"><div class="row"><input id="qi" placeholder="Buscar ingrediente" value="${esc(q)}"><button class="b" style="flex:none" data-add="ig">+ Ingrediente</button></div><div class="w"><table><tr><th>Produto</th><th>Unid</th><th class="r">Qtd compra</th><th class="r">Valor compra</th><th class="r">Valor unit</th><th></th></tr>
+ ${S.ing.map((g,i)=>[g,i]).filter(([g])=>g.n.toLowerCase().includes(q.toLowerCase())).map(([g,i])=>`<tr><td>${inp('ig',i,'n',g.n)}</td><td><select data-t="ig" data-i="${i}" data-k="u">${S.units.map(u=>`<option ${u===g.u?'selected':''}>${u}</option>`).join('')}</select></td><td>${inp('ig',i,'q',g.q,'inputmode="decimal"')}</td><td>${inp('ig',i,'v',g.v,'inputmode="decimal"')}</td><td class="r">${+g.q?brl2(g.v/g.q):'—'}</td><td><button class="b s" data-del="ig:${i}">✕</button></td></tr>`).join('')}</table></div></div>`;
+ const e=$('#qi');if(q){e.focus();e.setSelectionRange(q.length,q.length)}e.oninput=ings}
+const brl2=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:2,maximumFractionDigits:2});
+function ficha(i){const p=K.P[i],sp=S.prods[i];$('#fd').innerHTML=`<div class="row"><h2 style="flex:3">Ficha técnica: ${esc(p.n)}</h2><button class="b" style="flex:none" data-pdf="${i}">Gerar PDF</button><button class="b s" style="flex:none" data-x>Fechar</button></div><p class="note" id="pm"></p>
+ <div class="g c2"><div><p class="lb">Rendimento da ficha</p>${inp('pr',i,'r',sp.r,'inputmode="decimal"')}<div class="w"><table><tr><th>Ingrediente</th><th>Unid</th><th class="r">Qtd</th><th class="r">Custo unit</th><th class="r">Custo total</th><th></th></tr>
+ ${p.rows.map((r,j)=>`<tr><td><input list="il" class="${p.it[j].n&&!r.g?'bad':''}" data-t="fi" data-i="${i}" data-j="${j}" data-k="n" value="${esc(p.it[j].n)}"></td><td>${r.g?r.g.u:''}</td><td>${inp('fi',i,'q',p.it[j].q,`data-j="${j}" inputmode="decimal"`)}</td><td class="r">${isn(r.u)?brl2(r.u):'—'}</td><td class="r">${brl(r.cu)}</td><td><button class="b s" data-del="fi:${i}:${j}">✕</button></td></tr>`).join('')}
+ <tr><td colspan="4"><b>Custo total da ficha</b></td><td class="r"><b>${brl(p.tot)}</b></td><td></td></tr></table></div>${p.it.length<27?`<p><button class="b" data-add="fi:${i}">+ Ingrediente</button></p>`:''}<p class="note">Ingredientes em vermelho não existem no cadastro e entram com custo zero.</p></div>
+ <div class="cd"><h2>Precificação</h2>${[['Custo de insumos (por unidade)',brl(p.C)],['Custo fixo',brl(p.D)],['Impostos',pc(p.a)],['Taxa de cartão',pc(p.c)],['Taxa delivery/iFood',pc(p.d)],['Markup desejada',pc(p.m)],['Preço de venda sugerido',brl(p.L)],['Preço de venda aplicado',brl(p.p||0)],['Markup aplicado',pc(p.N)]].map(([a,b])=>`<div class="row"><span>${a}</span><b style="text-align:right">${b}</b></div>`).join('')}</div></div>`;
+ if(!$('#fd').open)$('#fd').showModal()}
+async function pdf(i){const p=K.P[i];let dl=null;const st=t=>{const e=$('#pm');if(e)e.textContent=t},pr=()=>{st('Abrindo a impressão: escolha "Salvar como PDF".');setTimeout(()=>window.print(),50)};try{dl=await claude.use('downloads')}catch(e){}
+ if(!dl||!window.jspdf)return pr();
+ const m=s=>String(s).replace(/\u00a0/g,' '),b=v=>m(isn(v)?brl2(v):'-'),d=new window.jspdf.jsPDF();let y=18;
+ d.setFont('helvetica','bold');d.setFontSize(16);d.text(d.splitTextToSize('Ficha técnica: '+p.n,180),14,y);y+=9;
+ d.setFont('helvetica','normal');d.setFontSize(10);d.text('Rendimento da ficha: '+(isn(p.r)?p.r:'-'),14,y);y+=9;
+ const hd=()=>{d.setFont('helvetica','bold');d.setFontSize(9);d.text('Ingrediente',14,y);d.text('Unid',100,y);d.text('Qtd',122,y,{align:'right'});d.text('Custo unit',156,y,{align:'right'});d.text('Custo total',196,y,{align:'right'});d.line(14,y+1.5,196,y+1.5);y+=6;d.setFont('helvetica','normal')};hd();
+ p.rows.forEach((r,j)=>{if(y>275){d.addPage();y=18;hd()}const x=p.it[j];d.text(d.splitTextToSize(String(x.n||''),82)[0],14,y);d.text(String(r.g?r.g.u:''),100,y);d.text(isn(x.q)?String(x.q):'-',122,y,{align:'right'});d.text(isn(r.u)?b(r.u):'-',156,y,{align:'right'});d.text(b(r.cu),196,y,{align:'right'});y+=5.5});
+ d.setFont('helvetica','bold');d.text('Custo total da ficha',14,y+2);d.text(b(p.tot),196,y+2,{align:'right'});y+=12;
+ if(y>215){d.addPage();y=18}
+ d.setFontSize(12);d.text('Precificação',14,y);y+=7;d.setFontSize(10);d.setFont('helvetica','normal');
+ [['Custo de insumos (por unidade)',brl(p.C)],['Custo fixo',brl(p.D)],['Impostos',pc(p.a)],['Taxa de cartão',pc(p.c)],['Taxa delivery/iFood',pc(p.d)],['Markup desejada',pc(p.m)],['Preço de venda sugerido',brl(p.L)],['Preço de venda aplicado',brl(p.p||0)],['Markup aplicado',pc(p.N)]].forEach(([a,v])=>{d.text(a,14,y);d.text(m(v),196,y,{align:'right'});y+=6});
+ const f='ficha-'+String(p.n).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-|-$/g,'').toLowerCase()+'.pdf';
+ try{await dl.save({filename:f,data:d.output('arraybuffer')});st('PDF salvo.')}catch(e){if(e&&e.code==='declined')return st('Download cancelado.');pr()}}
+document.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;const d=t.dataset;
+ if(t.id=='th'){const r=document.documentElement,dk=getComputedStyle(r).getPropertyValue('--bg').trim()=='#1b1815';r.dataset.theme=dk?'light':'dark';return render()}
+ if(t.id=='rs'){if(confirm('Restaurar os dados originais da planilha? Suas alterações serão perdidas.')){S=JSON.parse(JSON.stringify(SEED));render()}return}
+ if('nav'in d){tab=+d.nav;return render()}
+ if('pdf'in d)return pdf(+d.pdf).catch(()=>{const e=$('#pm');if(e)e.textContent='Abrindo a impressão: escolha "Salvar como PDF".';setTimeout(()=>window.print(),50)});
+ if('x'in d)return $('#fd').close();
+ if('fd'in d){sel=+d.fd;return render(),ficha(+d.fd)}
+ let o=null,fi=null;
+ if(d.add){const[a,i]=d.add.split(':');({ci:()=>S.custos.it.push({d:'',v:0,c:S.custos.cats[0]||''}),cat:()=>S.custos.cats.push('Nova categoria'),ig:()=>S.ing.push({n:'',u:S.units[0],q:null,v:null}),
+  pr:()=>S.prods.push({i:S.prods.reduce((m,p)=>Math.max(m,p.i),0)+1,n:'Novo produto',e:null,m:0.6,a:null,c:null,d:null,p:null,r:null,it:[]}),fi:()=>S.prods[+i].it.push({n:'',q:null})})[a]();fi=a=='fi'?+i:null}
+ else if(d.del){const[a,i,j]=d.del.split(':');if(!confirm('Excluir este item?'))return;({ci:()=>S.custos.it.splice(+i,1),cat:()=>S.custos.cats.splice(+i,1),ig:()=>S.ing.splice(+i,1),pr:()=>S.prods.splice(+i,1),fi:()=>S.prods[+i].it.splice(+j,1)})[a]();fi=a=='fi'?+i:null}
+ else return;render();if(fi!==null)ficha(fi)});
+document.addEventListener('change',e=>{const t=e.target,d=t.dataset;if(!d.t)return;const i=+d.i,k=d.k,v=t.value;
+ if(d.t=='sel')sel=+v;
+ else if(d.t=='fat')S.custos.fat=num(v)||0;
+ else if(d.t=='ci')S.custos.it[i][k]=k=='v'?num(v)||0:v;
+ else if(d.t=='cat'){const old=S.custos.cats[i];S.custos.cats[i]=v;S.custos.it.forEach(x=>{if(x.c===old)x.c=v})}
+ else if(d.t=='ig')S.ing[i][k]=['q','v'].includes(k)?num(v):v;
+ else if(d.t=='pn')S.prods[i].n=v;
+ else if(d.t=='pe')S.prods[i][k]=num(v);
+ else if(d.t=='pm'){const x=num(v);S.prods[i][k]=x===null?null:x/100}
+ else if(d.t=='pr')S.prods[i][k]=num(v);
+ else if(d.t=='fi'){const x=S.prods[i].it[+d.j];x[k]=k=='q'?num(v):v}
+ const fo=$('#fd').open;render();if(fo&&['fi','pr'].includes(d.t))ficha(i)});
+S=load();render();
+</script></body></html>
